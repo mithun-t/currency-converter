@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../src/App.css";
+import CurrencyConverterContainer from "./components/CurrencyConverterContainer";
 
 function App() {
   const [currencyList, setCurrencyList] = useState([]);
@@ -8,6 +9,8 @@ function App() {
   const [toCountry, setToCountry] = useState("");
   const [amount, setAmount] = useState("");
   const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(true);
+
   //
   useEffect(() => {
     const fetchData = async () => {
@@ -23,6 +26,7 @@ function App() {
       try {
         const response = await axios.request(options);
         setCurrencyList(response.data);
+        setLoading(false);
       } catch (error) {
         console.error(error);
       }
@@ -57,36 +61,27 @@ function App() {
 
     try {
       const response = await axios.request(options);
-      setResult((parseFloat(response.data) * parseFloat(amount)).toString());
+      setResult((parseFloat(response.data) * parseFloat(amount)).toFixed(2));
     } catch (error) {
       alert(error);
     }
   };
   //
+
   return (
     <>
-      <div id="converter-container">
-        <h2>Currency Converter</h2>
-        <input
-          onChange={(event) => setAmount(event.target.value)}
-          type="number"
-          placeholder="Enter amount"
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <CurrencyConverterContainer
+          currencyList={currencyList}
+          result={result}
+          handleClick={handleClick}
+          setAmount={setAmount}
+          setFromCountry={setFromCountry}
+          setToCountry={setToCountry}
         />
-        <select onChange={(event) => setFromCountry(event?.target.value)}>
-          {currencyList &&
-            currencyList.map((list, index) => (
-              <option key={index}>{list}</option>
-            ))}
-        </select>
-        <select onChange={(event) => setToCountry(event?.target.value)}>
-          {currencyList &&
-            currencyList.map((list, index) => (
-              <option key={index}>{list}</option>
-            ))}
-        </select>
-        <button onClick={handleClick}>Convert</button>
-        <p>{result}</p>
-      </div>
+      )}
     </>
   );
 }
